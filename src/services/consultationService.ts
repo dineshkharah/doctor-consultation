@@ -40,3 +40,33 @@ export const assertNoOpenDuplicate = async (
     );
   }
 };
+
+// Loads a consultation and confirms the caller is one of its two parties.
+export const findConsultationForParty = async (id: number, userId: number) => {
+  const consultation = await prisma.consultation.findUnique({ where: { id } });
+
+  if (!consultation) {
+    throw new AppError("Consultation not found", 404, "CONSULTATION_NOT_FOUND");
+  }
+
+  if (consultation.patientId !== userId && consultation.doctorId !== userId) {
+    throw new AppError(
+      "You are not allowed to view this consultation",
+      403,
+      "FORBIDDEN",
+    );
+  }
+
+  return consultation;
+};
+
+// Messages may only be sent while the consultation is ACTIVE.
+export const assertActiveForMessaging = (status: Status) => {
+  if (status !== "ACTIVE") {
+    throw new AppError(
+      "Messages can only be sent while the consultation is active",
+      409,
+      "CONSULTATION_NOT_ACTIVE",
+    );
+  }
+};
