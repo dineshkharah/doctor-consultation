@@ -1,15 +1,21 @@
 import "dotenv/config";
 import express from "express";
+import routes from "./routes";
+import { notFoundHandler } from "./middleware/notFoundHandler";
+import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
 
-// Lets the app read JSON request bodies.
 app.use(express.json());
 
-// Simple health check so we can confirm the server is up.
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
+
+app.use("/api/v1", routes);
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 const PORT = process.env.PORT ?? 3000;
 
