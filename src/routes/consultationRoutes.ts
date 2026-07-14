@@ -13,6 +13,7 @@ import {
   createConsultationSchema,
   updateStatusSchema,
 } from "../schemas/consultationSchema";
+import messageRoutes from "./messageRoutes";
 
 const router = Router();
 
@@ -30,5 +31,7 @@ router.patch(
   validate(updateStatusSchema),
   updateConsultationStatus,
 );
+
+router.use("/:id/messages", validateParams(idParamSchema), messageRoutes);
 
 export default router;
