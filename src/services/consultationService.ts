@@ -41,6 +41,20 @@ export const assertNoOpenDuplicate = async (
   }
 };
 
+// Confirms the caller is one of the consultation's two parties, else 403.
+export const assertParty = (
+  consultation: { patientId: number; doctorId: number },
+  userId: number,
+) => {
+  if (consultation.patientId !== userId && consultation.doctorId !== userId) {
+    throw new AppError(
+      "You are not allowed to view this consultation",
+      403,
+      "FORBIDDEN",
+    );
+  }
+};
+
 // Loads a consultation and confirms the caller is one of its two parties.
 export const findConsultationForParty = async (id: number, userId: number) => {
   const consultation = await prisma.consultation.findUnique({ where: { id } });
@@ -49,14 +63,7 @@ export const findConsultationForParty = async (id: number, userId: number) => {
     throw new AppError("Consultation not found", 404, "CONSULTATION_NOT_FOUND");
   }
 
-  if (consultation.patientId !== userId && consultation.doctorId !== userId) {
-    throw new AppError(
-      "You are not allowed to view this consultation",
-      403,
-      "FORBIDDEN",
-    );
-  }
-
+  assertParty(consultation, userId);
   return consultation;
 };
 

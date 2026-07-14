@@ -5,6 +5,7 @@ import { AppError } from "../utils/AppError";
 import {
   assertTransition,
   assertNoOpenDuplicate,
+  assertParty,
 } from "../services/consultationService";
 import type {
   CreateConsultationInput,
@@ -85,14 +86,7 @@ export const getConsultationById = asyncHandler(async (req, res) => {
     throw new AppError("Consultation not found", 404, "CONSULTATION_NOT_FOUND");
   }
 
-  const { userId } = req.user!;
-  if (consultation.patientId !== userId && consultation.doctorId !== userId) {
-    throw new AppError(
-      "You are not allowed to view this consultation",
-      403,
-      "FORBIDDEN",
-    );
-  }
+  assertParty(consultation, req.user!.userId);
 
   res.json(toConsultationDto(consultation));
 });
